@@ -1,0 +1,250 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FUB Header Generator</title>
+<style>
+  :root {
+    color-scheme: light dark;
+    --bg: #f7f7f5;
+    --panel: #ffffff;
+    --border: #e2e0da;
+    --text: #1c1b19;
+    --muted: #6b6a66;
+    --accent: #b5651d;
+    --mono-bg: #1c1b19;
+    --mono-text: #f2f0ea;
+    --mono-label: #9a9890;
+    --ok: #3f7d3f;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #171614;
+      --panel: #211f1c;
+      --border: #38352f;
+      --text: #ece9e2;
+      --muted: #9a978e;
+      --accent: #d68a4a;
+      --mono-bg: #0e0d0c;
+      --mono-text: #f2f0ea;
+      --mono-label: #7d7a72;
+      --ok: #7fbf7f;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    display: flex;
+    justify-content: center;
+    padding: 48px 20px;
+  }
+  main {
+    width: 100%;
+    max-width: 640px;
+  }
+  h1 {
+    font-size: 20px;
+    margin: 0 0 4px;
+  }
+  .subtitle {
+    color: var(--muted);
+    font-size: 13.5px;
+    margin: 0 0 28px;
+    line-height: 1.5;
+  }
+  .card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px;
+    margin-bottom: 20px;
+  }
+  label {
+    display: block;
+    font-size: 12.5px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 8px;
+  }
+  .key-row {
+    display: flex;
+    gap: 8px;
+  }
+  input[type="text"], input[type="password"] {
+    flex: 1;
+    min-width: 0;
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-size: 14px;
+    padding: 10px 12px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--bg);
+    color: var(--text);
+  }
+  input:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+  button {
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 10px 14px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--panel);
+    color: var(--text);
+    cursor: pointer;
+  }
+  button:hover { border-color: var(--accent); }
+  button.copy {
+    display: block;
+    width: 100%;
+    margin-top: 14px;
+  }
+  button.copy.copied { border-color: var(--ok); color: var(--ok); }
+  .hint {
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 10px;
+    line-height: 1.5;
+  }
+  pre.headers {
+    background: var(--mono-bg);
+    color: var(--mono-text);
+    border-radius: 10px;
+    padding: 16px;
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-size: 13px;
+    line-height: 1.7;
+    overflow-x: auto;
+    margin: 0;
+    white-space: pre-wrap;
+    word-break: break-all;
+  }
+  pre.headers .label { color: var(--mono-label); }
+  pre.headers.empty { color: var(--mono-label); font-style: italic; white-space: normal; }
+  .footer-note {
+    font-size: 12px;
+    color: var(--muted);
+    text-align: center;
+    line-height: 1.6;
+  }
+  .footer-note code {
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    padding: 1px 5px;
+    border-radius: 4px;
+  }
+</style>
+</head>
+<body>
+<main>
+  <h1>FUB Header Generator</h1>
+  <p class="subtitle">
+    Paste a Follow Up Boss API key. This page runs entirely in your browser —
+    nothing is sent anywhere, there's no server involved, and closing the tab
+    discards everything.
+  </p>
+
+  <div class="card">
+    <label for="apiKey">API Key</label>
+    <div class="key-row">
+      <input id="apiKey" type="password" placeholder="fka_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" autocomplete="off" spellcheck="false">
+      <button id="toggleVis" type="button">Show</button>
+    </div>
+    <div class="hint">
+      FUB auth is plain HTTP Basic Auth: the API key as the username, an empty
+      password. No <code>X-System</code> / <code>X-System-Key</code> headers
+      are included — those only matter if you've registered as a named FUB
+      integration (needed for webhook signature verification), not for a
+      plain authed request.
+    </div>
+  </div>
+
+  <div class="card">
+    <label>Headers</label>
+    <pre id="output" class="headers empty">Enter an API key above.</pre>
+    <button id="copyBtn" class="copy" type="button" disabled>Copy header</button>
+  </div>
+
+  <p class="footer-note">
+    Reference: <code>crm/fub.py</code> in beast-mode-buddies —
+    <code>auth=(api_key, "")</code> via <code>requests</code>, which is what
+    produces this exact <code>Authorization</code> header.
+  </p>
+</main>
+
+<script>
+  const input = document.getElementById('apiKey');
+  const toggleBtn = document.getElementById('toggleVis');
+  const output = document.getElementById('output');
+  const copyBtn = document.getElementById('copyBtn');
+
+  function b64(str) {
+    // classic UTF-8-safe base64 idiom; avoids relying on TextEncoder
+    return btoa(unescape(encodeURIComponent(str)));
+  }
+
+  function showError(err) {
+    output.classList.remove('empty');
+    output.textContent = 'Error: ' + (err && err.message ? err.message : String(err));
+    output.style.color = '#d9534f';
+    copyBtn.disabled = true;
+  }
+
+  function render() {
+    try {
+      output.style.color = '';
+      const key = input.value.trim();
+      if (!key) {
+        output.textContent = 'Enter an API key above.';
+        output.classList.add('empty');
+        copyBtn.disabled = true;
+        return;
+      }
+      const encoded = b64(key + ':');
+      output.classList.remove('empty');
+      output.innerHTML = '<span class="label">Authorization:</span> Basic ' + encoded;
+      copyBtn.disabled = false;
+      copyBtn.textContent = 'Copy header';
+      copyBtn.classList.remove('copied');
+    } catch (err) {
+      showError(err);
+    }
+  }
+
+  window.addEventListener('error', (e) => showError(e.error || e.message));
+
+  toggleBtn.addEventListener('click', () => {
+    const showing = input.type === 'text';
+    input.type = showing ? 'password' : 'text';
+    toggleBtn.textContent = showing ? 'Show' : 'Hide';
+  });
+
+  copyBtn.addEventListener('click', async () => {
+    const key = input.value.trim();
+    if (!key) return;
+    const line = 'Authorization: Basic ' + b64(key + ':');
+    try {
+      await navigator.clipboard.writeText(line);
+      copyBtn.textContent = 'Copied';
+      copyBtn.classList.add('copied');
+      setTimeout(() => {
+        copyBtn.textContent = 'Copy header';
+        copyBtn.classList.remove('copied');
+      }, 1500);
+    } catch (e) {
+      output.insertAdjacentHTML('beforeend', '\n(clipboard write failed — copy manually)');
+    }
+  });
+
+  input.addEventListener('input', render);
+  render();
+</script>
+</body>
+</html>
