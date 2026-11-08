@@ -14,7 +14,7 @@ git clone https://github.com/wilbee-inelegant/fub-header-tool.git
 cd fub-header-tool
 ```
 
-Review `muse.html`, then open that file directly in your browser (double-click it, or use File → Open). **Disconnect from the internet before entering your key.** No package installation, build, local server, account, or external script is needed. You may instead download `muse.html` or save the hosted page before entering a key. Never save a page after entering credentials.
+Review `muse.html`, then open that file directly in your browser (double-click it, or use File → Open). **Disconnect from the internet before entering your key.** No package installation, build, local server, account, or external script is needed. You may instead download the repository’s `muse.html` before entering a key. Do not use Save Page on the hosted version: its separate integrity-pinned script is intended for HTTPS hosting. Never save a page after entering credentials.
 
 1. Paste your raw FUB API key into the API key field.
 2. Choose **Create header**, then **Copy header value**.
