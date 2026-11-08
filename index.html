@@ -209,7 +209,7 @@
       }
       const encoded = b64(key + ':');
       output.classList.remove('empty');
-      output.innerHTML = '<span class="label">Authorization:</span> Basic ' + encoded;
+      output.textContent = 'Authorization: Basic ' + encoded;
       copyBtn.disabled = false;
       copyBtn.textContent = 'Copy header';
       copyBtn.classList.remove('copied');
@@ -239,7 +239,7 @@
         copyBtn.classList.remove('copied');
       }, 1500);
     } catch (e) {
-      output.insertAdjacentHTML('beforeend', '\n(clipboard write failed — copy manually)');
+      copyBtn.textContent = 'Copy unavailable; select the header and copy manually';
     }
   });
 

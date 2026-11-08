@@ -208,10 +208,9 @@
     <span>🔒</span>
     <span>
       <strong>Your API key stays on your device.</strong>
-      This page has no server and makes no network requests — everything is
-      computed locally in your browser with plain JavaScript. Closing or
-      reloading the tab discards it completely; nothing is ever sent to us
-      or anywhere else.
+      Conversion runs locally in your browser with plain JavaScript. Loading
+      this page initially contacts its host; the converter does not send your key.
+      Your clipboard and browser extensions are outside this page’s control.
     </span>
   </div>
 
@@ -313,9 +312,7 @@
         return;
       }
       output.classList.remove('empty');
-      output.innerHTML = lines
-        .map(([k, v]) => '<span class="label">' + k + ':</span> ' + v)
-        .join('\n');
+      output.textContent = lines.map(([k, v]) => k + ': ' + v).join('\n');
       copyBtn.disabled = false;
       copyBtn.textContent = 'Copy all headers';
       copyBtn.classList.remove('copied');
@@ -350,7 +347,7 @@
         copyBtn.classList.remove('copied');
       }, 1500);
     } catch (e) {
-      output.insertAdjacentHTML('beforeend', '\n(clipboard write failed — copy manually)');
+      copyBtn.textContent = 'Copy unavailable; select the headers and copy manually';
     }
   });
 
