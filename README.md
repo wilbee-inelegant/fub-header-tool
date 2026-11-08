@@ -36,7 +36,7 @@ The tool copies only the value (`Basic …`), not the header name. The trailing 
 
 ## Security boundary
 
-`muse.html` is one self-contained file. It contains no `fetch`, XMLHttpRequest, WebSocket, beacon, telemetry, external dependencies, service worker, cookies, local/session storage, form submission, URL parameters, or console logging. A hash-based Content Security Policy permits only the reviewed inline script/style and blocks network connections and forms. The code clears its input/output on page exit and restoration, and invalidates old output when the key changes. It does not promise secure erasure of browser memory.
+`muse.html` is one self-contained file. The hosted version is packaged as HTML plus a same-origin script and icon to comply with the existing host’s strict security policy. The script has a pinned Subresource Integrity digest and exactly matches the standalone file’s JavaScript. These public assets load before key entry; conversion performs no network requests. It contains no `fetch`, XMLHttpRequest, WebSocket, beacon, telemetry, external dependencies, service worker, cookies, local/session storage, form submission, URL parameters, or console logging. A hash-based Content Security Policy permits only the reviewed script/style and blocks network connections and forms. The code clears its input/output on page exit and restoration, and invalidates old output when the key changes. It does not promise secure erasure of browser memory.
 
 The hosted page must initially be downloaded from its web host, which can receive ordinary page-request metadata. The entered key and generated value are not part of that request and are never deliberately transmitted by this page. Following an external documentation/source link is an ordinary separate navigation. Use a reviewed local file while disconnected for the strongest practical separation from hosting changes.
 
@@ -61,3 +61,7 @@ NODE_PATH=/path/to/existing/node_modules node scripts/browser-test-muse.cjs
 The suite checks local-file operation with the browser offline, UTF-8 Base64 correctness, copying and denied-copy fallback, repeated actions, invalid inputs, key/header masking, clearing/restoration, no persistent storage, CSP, network API instrumentation, and mobile/desktop overflow. The suite uses an isolated headless profile of already-installed Google Chrome; it never uses your signed-in profile. No credential should be provided to the test commands.
 
 Source reference: [Follow Up Boss authentication](https://docs.followupboss.com/reference/authentication).
+
+## Package for static hosting
+
+`node scripts/build-hosted.cjs /path/to/new/output` creates HTML, an integrity-pinned same-origin script, and a static icon. Publish all three together without injecting analytics or other scripts. The existing server policy can remain `script-src 'self'`; do not weaken it to allow arbitrary inline code. The standalone offline file stays unchanged.
